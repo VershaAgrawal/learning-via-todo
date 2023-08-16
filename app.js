@@ -2,11 +2,11 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-var port = 5000;
-var db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
+const port = 5000;
+const db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
 
-var todos = require("./routes/todos");
-
+const todos = require("./routes/todos");
+const user_authentication = require("./routes/user_authentication");
 mongoose
   .connect(db)
   .catch((err) =>
@@ -22,6 +22,7 @@ app.use(
 );
 
 app.use("/todos", todos);
+app.use("/", user_authentication);
 
 app.listen(port, () => {
   console.log("Listening to port: " + port);
