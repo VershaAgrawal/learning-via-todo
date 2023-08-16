@@ -9,4 +9,4 @@ const checkID = async (req, res, next) => {
   res.status(400).json({ error: "Invalid id" });
 };
 
-module.exports = checkID;
+module.exports = { checkID };

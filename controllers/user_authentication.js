@@ -1,4 +1,29 @@
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const secretKey = process.env.SECRET_KEY || "secretkey";
+
+const verifyToken = async (req, res, next) => {
+  let token = req.headers.authorization;
+
+  console.log(token);
+  //Authorization: 'Bearer TOKEN'
+  if (!token) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Error!Token was not provided." });
+  }
+  token = token.split(" ")[1];
+  //Decoding the token
+  try {
+    const decodedToken = await jwt.verify(token, secretKey);
+    req.user = decodedToken;
+    next();
+  } catch (err) {
+    res
+      .status(401)
+      .json({ success: false, error: "Error in verifying the token" });
+  }
+};
 
 const signUp = async (inputs) => {
   console.log("Insering new user...");
@@ -37,7 +62,6 @@ const login = async (inputs) => {
   console.log("Logging in...");
   try {
     const { emailId, password } = inputs;
-    const user = new User({ emailId, password });
     if (emailId == "" || typeof emailId != "string")
       return {
         statusCode: 400,
@@ -59,10 +83,19 @@ const login = async (inputs) => {
         statusCode: 400,
         body: { error: "Incorrect password" },
       };
+    const token = await jwt.sign(
+      { _id: userDetail._id, emailId: userDetail.emailId },
+      secretKey,
+      { expiresIn: "300s" }
+    );
 
     return {
       statusCode: 200,
-      body: { success: "User validated. Logged in" },
+      body: {
+        success: "User validated. Logged in",
+        emailId: userDetail.emailId,
+        token: token,
+      },
     };
   } catch (err) {
     return {
@@ -80,4 +113,4 @@ const login = async (inputs) => {
   //   }
 };
 
-module.exports = { signUp, login };
+module.exports = { signUp, login, verifyToken };
