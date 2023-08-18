@@ -1,5 +1,5 @@
 const Todo = require("../models/todo");
-
+const postToSlack = require("./slackIntegration");
 //fetch Todos
 const fetchTodos = async () => {
   console.log("Fetching all the tasks");
@@ -32,7 +32,10 @@ const insertTask = async (inputs) => {
     const completed = false;
     const newTodo = new Todo({ taskText, completed });
     await newTodo.save();
-    // const { __v, ...retTodo } = newTodo.toJSON();--- Destructing the JSON {versionKey variable, rest json variable}
+
+    //const { __v, ...retTodo } = newTodo.toJSON(); //--- Destructing the JSON {versionKey variable, rest json variable}
+    await postToSlack(newTodo.taskText);
+
     return {
       statusCode: 200,
       body: { todo: newTodo.toObject({ versionKey: false }) },

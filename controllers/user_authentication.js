@@ -5,7 +5,6 @@ const secretKey = process.env.SECRET_KEY || "secretkey";
 const verifyToken = async (req, res, next) => {
   let token = req.headers.authorization;
 
-  console.log(token);
   //Authorization: 'Bearer TOKEN'
   if (!token) {
     return res
@@ -86,7 +85,7 @@ const login = async (inputs) => {
     const token = await jwt.sign(
       { _id: userDetail._id, emailId: userDetail.emailId },
       secretKey,
-      { expiresIn: "300s" }
+      { expiresIn: "3000s" }
     );
 
     return {
