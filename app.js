@@ -6,7 +6,12 @@ const port = 5000;
 const db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
 
 const todos = require("./routes/todos");
+const {
+  loginRateLimiter,
+  todosRateLimiter,
+} = require(".//controllers/rateLimit");
 const user_authentication = require("./routes/user_authentication");
+
 mongoose
   .connect(db)
   .catch((err) =>
@@ -21,8 +26,13 @@ app.use(
   })
 );
 
-app.use("/todos", todos);
-app.use("/", user_authentication);
+app.use("/todos", todosRateLimiter, todos);
+
+app.use("/", loginRateLimiter, user_authentication);
+
+app.use((req, res) => {
+  res.status(404).json({ error: "API not found" });
+});
 
 app.listen(port, () => {
   console.log("Listening to port: " + port);
