@@ -9,7 +9,7 @@ const todos = require("./routes/todos");
 const {
   loginRateLimiter,
   todosRateLimiter,
-} = require(".//controllers/rateLimit");
+} = require("./controllers/rateLimit");
 
 const user = require("./routes/user");
 mongoose
