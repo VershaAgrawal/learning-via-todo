@@ -1,5 +1,4 @@
 const Todo = require("../models/todo");
-const { findOne } = require("../models/user");
 const postToSlack = require("./slackIntegration");
 const User = require("../models/user");
 //fetch Todos

@@ -12,18 +12,17 @@ const {
   updateTask,
 } = require("../controllers/todos");
 
-const { verifyToken } = require("../controllers/user_authentication");
+const { verifyToken } = require("../controllers/user");
 //Fetching all the task
 router.get("/", verifyToken, async (req, res) => {
-  const userId = await User.findOne({ _id: req.user._id }, "_id");
+  const userId = await User.findOne({ _id: req.user._id }, { _id: 1 });
   const retJson = await fetchTodos({ userId: userId._id });
   res.status(retJson.statusCode).json(retJson.body);
 });
 
 //Inserting a new task
 router.post("/", verifyToken, async (req, res) => {
-  console.log(req.user);
-  const userId = await User.findOne({ _id: req.user._id }, "_id");
+  const userId = await User.findOne({ _id: req.user._id }, { _id: 1 });
   const retJson = await insertTask({ ...req.body, userId: userId._id });
   res.status(retJson.statusCode).json(retJson.body);
 });
