@@ -1,9 +1,8 @@
 const axios = require("axios");
-const slackUrl =
-  "https://hooks.slack.com/services/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";
 
-const postToSlack = async (text) => {
-  const payload = { text: "New Todo created: " + text };
+const postToSlack = async (input) => {
+  const { taskText, slackUrl } = input;
+  const payload = { text: "New Todo created: " + taskText };
   const status = await axios.post(slackUrl, payload);
 };
 

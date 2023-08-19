@@ -10,8 +10,8 @@ const {
   loginRateLimiter,
   todosRateLimiter,
 } = require(".//controllers/rateLimit");
-const user_authentication = require("./routes/user_authentication");
 
+const user = require("./routes/user");
 mongoose
   .connect(db)
   .catch((err) =>
@@ -28,7 +28,7 @@ app.use(
 
 app.use("/todos", todosRateLimiter, todos);
 
-app.use("/", loginRateLimiter, user_authentication);
+app.use("/", loginRateLimiter, user);
 
 app.use((req, res) => {
   res.status(404).json({ error: "API not found" });
