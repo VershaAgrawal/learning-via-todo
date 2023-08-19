@@ -1,10 +1,12 @@
 const Todo = require("../models/todo");
-
+const postToSlack = require("./slackIntegration");
+const User = require("../models/user");
 //fetch Todos
-const fetchTodos = async () => {
+const fetchTodos = async (inputs) => {
   console.log("Fetching all the tasks");
   try {
-    const todos = await Todo.find({}, { __v: 0 });
+    const userId = inputs.userId;
+    const todos = await Todo.find({ userId: userId }, { __v: 0 });
     return {
       statusCode: 200,
       body: { todos },
@@ -21,7 +23,7 @@ const fetchTodos = async () => {
 const insertTask = async (inputs) => {
   console.log("Inserting new task....");
   try {
-    const taskText = inputs.taskText;
+    const { taskText, userId } = inputs;
 
     if (taskText == "" || typeof taskText != "string")
       return {
@@ -30,9 +32,19 @@ const insertTask = async (inputs) => {
       };
 
     const completed = false;
-    const newTodo = new Todo({ taskText, completed });
+    const newTodo = new Todo({ taskText, completed, userId });
+
     await newTodo.save();
-    // const { __v, ...retTodo } = newTodo.toJSON();--- Destructing the JSON {versionKey variable, rest json variable}
+
+    const user = await User.findOne({ _id: userId }, { slackUrl: 1 });
+    if (typeof user.slackUrl != "undefined") {
+      await postToSlack({
+        taskText: newTodo.taskText,
+        slackUrl: user.slackUrl,
+      });
+    }
+
+    //const { __v, ...retTodo } = newTodo.toJSON(); //--- Destructing the JSON {versionKey variable, rest json variable}
     return {
       statusCode: 200,
       body: { todo: newTodo.toObject({ versionKey: false }) },

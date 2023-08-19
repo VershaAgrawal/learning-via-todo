@@ -5,7 +5,6 @@ const secretKey = process.env.SECRET_KEY || "secretkey";
 const verifyToken = async (req, res, next) => {
   let token = req.headers.authorization;
 
-  console.log(token);
   //Authorization: 'Bearer TOKEN'
   if (!token) {
     return res
@@ -29,6 +28,7 @@ const signUp = async (inputs) => {
   console.log("Insering new user...");
   try {
     const { emailId, password } = inputs;
+
     const user = new User({ emailId, password });
     if (emailId == "" || typeof emailId != "string")
       return {
@@ -83,10 +83,12 @@ const login = async (inputs) => {
         statusCode: 400,
         body: { error: "Incorrect password" },
       };
+
+    //generate jwt token
     const token = await jwt.sign(
       { _id: userDetail._id, emailId: userDetail.emailId },
       secretKey,
-      { expiresIn: "300s" }
+      { expiresIn: "3000s" }
     );
 
     return {
@@ -103,14 +105,24 @@ const login = async (inputs) => {
       body: { error: "Error while logging in: " + err.message },
     };
   }
-  //     // console.log(err.code);
-  //     // if (err.code == 11000) body = { error: "User already exists" };
-  //     // else body = { error: "Unable to signup :" + err.message };
-  //     // return {
-  //     //   statusCode: 400,
-  //     //   body: body,
-  //     // };
-  //   }
 };
 
-module.exports = { signUp, login, verifyToken };
+//Update slack URL in users document
+const updateSlackUrl = async (inputs) => {
+  console.log("Updating slack url...");
+  const { _id, slackUrl } = inputs;
+  if (typeof slackUrl == "" || typeof slackUrl != "string") {
+    return {
+      statusCode: 400,
+      body: { error: "Invalid URL" },
+    };
+  }
+  const updateSlackUrl = await User.findByIdAndUpdate(_id, { slackUrl });
+  const updatedUser = await User.findOne({ _id: _id }, { __v: 0 });
+  return {
+    statusCode: 200,
+    body: { user: updatedUser },
+  };
+};
+
+module.exports = { signUp, login, verifyToken, updateSlackUrl };

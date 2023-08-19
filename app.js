@@ -6,7 +6,7 @@ const port = 5000;
 const db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
 
 const todos = require("./routes/todos");
-const user_authentication = require("./routes/user_authentication");
+const user = require("./routes/user");
 mongoose
   .connect(db)
   .catch((err) =>
@@ -22,7 +22,7 @@ app.use(
 );
 
 app.use("/todos", todos);
-app.use("/", user_authentication);
+app.use("/", user);
 
 app.listen(port, () => {
   console.log("Listening to port: " + port);
