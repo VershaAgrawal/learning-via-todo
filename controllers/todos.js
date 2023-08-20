@@ -118,4 +118,25 @@ const deleteTask = async (inputs) => {
   }
 };
 
-module.exports = { fetchTodos, insertTask, deleteTask, updateTask };
+//inserting multiple tasks
+const batchInsertTask = async (inputs) => {
+  const { todos, userId } = inputs;
+
+  const arrProm = todos.map((oneTask) => {
+    return insertTask({ taskText: oneTask.taskText, userId });
+  });
+  const retArrs = await Promise.all(arrProm); //retArrs-> array of resolved promises
+
+  return {
+    statusCode: 200,
+    body: { todos: retArrs },
+  };
+};
+
+module.exports = {
+  fetchTodos,
+  insertTask,
+  deleteTask,
+  updateTask,
+  batchInsertTask,
+};

@@ -10,6 +10,7 @@ const {
   insertTask,
   deleteTask,
   updateTask,
+  batchInsertTask,
 } = require("../controllers/todos");
 
 const { verifyToken } = require("../controllers/user");
@@ -34,9 +35,15 @@ router.put("/:_id", verifyToken, checkTodosID, async (req, res) => {
 });
 
 //Deleting  a task
-
 router.delete("/:_id", verifyToken, checkTodosID, async (req, res) => {
   const retJson = await deleteTask(req.params);
+  res.status(retJson.statusCode).json(retJson.body);
+});
+
+//bactch API for inserting multiple tasks
+router.post("/batch", verifyToken, async (req, res) => {
+  const userId = await User.findOne({ _id: req.user._id }, { _id: 1 });
+  const retJson = await batchInsertTask({ ...req.body, userId: userId._id });
   res.status(retJson.statusCode).json(retJson.body);
 });
 
