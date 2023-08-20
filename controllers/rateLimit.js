@@ -9,7 +9,6 @@ const client = new RedisClient({
   //   username: "default", // needs Redis >= 6
   //   password: "my-top-secret",
   //   db: 0, // Defaults to 0
-  // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
 });
 
 const loginRateLimiter = rateLimit({
