@@ -6,11 +6,12 @@ const fetchTodos = async (inputs) => {
   console.log("Fetching all the tasks");
   try {
     const userId = inputs.userId;
-    const page = inputs.page || 1;
-    const limit = inputs.limit || 5;
-    if (Number.isInteger(page) || page < 1)
+    const page = Number(inputs.page || "1");
+    const limit = Number(inputs.limit || "5");
+
+    if (!Number.isInteger(page) || page < 1)
       throw new Error("Page should be a valid number.");
-    if (Number.isInteger(limit) || limit < 1)
+    if (!Number.isInteger(limit) || limit < 1)
       throw new Error("Limit should be a valid number.");
     const skip = (page - 1) * limit;
 
