@@ -17,7 +17,7 @@ const { verifyToken } = require("../controllers/user");
 //Fetching all the task
 router.get("/", verifyToken, async (req, res) => {
   const userId = await User.findOne({ _id: req.user._id }, { _id: 1 });
-  const retJson = await fetchTodos({ userId: userId._id });
+  const retJson = await fetchTodos({ userId: userId._id, ...req.query });
   res.status(retJson.statusCode).json(retJson.body);
 });
 

@@ -6,10 +6,22 @@ const fetchTodos = async (inputs) => {
   console.log("Fetching all the tasks");
   try {
     const userId = inputs.userId;
-    const todos = await Todo.find({ userId: userId }, { __v: 0 });
+    const page = inputs.page || 1;
+    const limit = inputs.limit || 5;
+    const skip = (page - 1) * limit;
+
+    const promTodos = Todo.find({ userId: userId }, { __v: 0 })
+      .skip(skip)
+      .limit(limit);
+
+    const promCountTodo = Todo.countDocuments({ userId: userId });
+
+    const [todos, countTodo] = await Promise.all([promTodos, promCountTodo]);
+    const noOfPages = countTodo / limit;
+
     return {
       statusCode: 200,
-      body: { todos },
+      body: { totalPages: noOfPages, todos: todos },
     };
   } catch (error) {
     return {
