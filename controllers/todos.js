@@ -8,6 +8,8 @@ const fetchTodos = async (inputs) => {
     const userId = inputs.userId;
     const page = Number(inputs.page || "1");
     const limit = Number(inputs.limit || "5");
+    const taskText = inputs.taskText;
+    const completed = inputs.completed;
 
     if (!Number.isInteger(page) || page < 1)
       throw new Error("Page should be a valid number.");
@@ -15,7 +17,16 @@ const fetchTodos = async (inputs) => {
       throw new Error("Limit should be a valid number.");
     const skip = (page - 1) * limit;
 
-    const promTodos = Todo.find({ userId: userId }, { __v: 0 })
+    var whereClause = { userId: userId };
+    console.log("whereClause1:: " + whereClause.userId);
+    if (taskText) {
+      whereClause.taskText = taskText;
+    }
+    if (completed) {
+      whereClause.completed = completed;
+    }
+
+    const promTodos = Todo.find(whereClause, { __v: 0 })
       .skip(skip)
       .limit(limit);
 
