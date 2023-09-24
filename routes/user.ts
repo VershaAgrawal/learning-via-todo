@@ -1,5 +1,4 @@
-const express = require("express");
-const User = require("../models/user");
+import express, { Express, Request, Response } from "express";
 const router = express.Router();
 
 const { signUp, login, updateSlackUrl } = require("../controllers/user");
@@ -20,4 +19,4 @@ router.put("/user/:_id", checkUserId, async (req, res) => {
   res.status(retJson.statusCode).json(retJson.body);
 });
 
-module.exports = router;
+export = router;

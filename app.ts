@@ -1,4 +1,4 @@
-const express = require("express");
+import express, { Express, Request, Response } from "express";
 const app = express();
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -14,7 +14,7 @@ const {
 const user = require("./routes/user");
 mongoose
   .connect(db)
-  .catch((err) =>
+  .catch((err: { message: string }) =>
     console.error("Error while connecting to MongoDB" + err.message)
   ); //connecting to the db
 

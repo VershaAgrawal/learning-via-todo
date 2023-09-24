@@ -1,8 +1,11 @@
-const Todo = require("../models/todo");
-const postToSlack = require("./slackIntegration");
-const User = require("../models/user");
+import { Todo } from "../models/todo";
+import { postToSlack } from "./slackIntegration";
+import { User } from "../models/user";
+import { FetchTodosInput } from "./definitionfile";
+import { TodosInput } from "./definitionfile";
+
 //fetch Todos
-const fetchTodos = async (inputs) => {
+export async function fetchTodos(inputs: FetchTodosInput) {
   console.log("Fetching all the tasks");
   try {
     const userId = inputs.userId;
@@ -17,8 +20,10 @@ const fetchTodos = async (inputs) => {
       throw new Error("Limit should be a valid number.");
     const skip = (page - 1) * limit;
 
-    var whereClause = { userId: userId };
-    console.log("whereClause1:: " + whereClause.userId);
+    const whereClause: TodosInput = {
+      userId: userId,
+    };
+
     if (taskText) {
       whereClause.taskText = taskText;
     }
@@ -39,16 +44,16 @@ const fetchTodos = async (inputs) => {
       statusCode: 200,
       body: { totalPages: noOfPages, todos: todos },
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       statusCode: 400,
       body: { error: "Error while fetching todos: " + error.message },
     };
   }
-};
+}
 
 //insert task
-const insertTask = async (inputs) => {
+export async function insertTask(inputs: TodosInput) {
   console.log("Inserting new task....");
   try {
     const { taskText, userId } = inputs;
@@ -65,11 +70,16 @@ const insertTask = async (inputs) => {
     await newTodo.save();
 
     const user = await User.findOne({ _id: userId }, { slackUrl: 1 });
-    if (typeof user.slackUrl != "undefined") {
-      await postToSlack({
-        taskText: newTodo.taskText,
-        slackUrl: user.slackUrl,
-      });
+    if (user) {
+      if (
+        typeof newTodo.taskText != "undefined" &&
+        typeof user.slackUrl != "undefined"
+      ) {
+        await postToSlack({
+          taskText: newTodo.taskText,
+          slackUrl: user.slackUrl,
+        });
+      }
     }
 
     //const { __v, ...retTodo } = newTodo.toJSON(); //--- Destructing the JSON {versionKey variable, rest json variable}
@@ -77,66 +87,73 @@ const insertTask = async (inputs) => {
       statusCode: 200,
       body: { todo: newTodo.toObject({ versionKey: false }) },
     };
-  } catch (error) {
+  } catch (error: any) {
     return {
       statusCode: 400,
       body: { error: "Error while inserting new todo: " + error.message },
     };
   }
-};
+}
 
 //update a task
-const updateTask = async (inputs) => {
+export async function updateTask(inputs: {
+  _id: any;
+  completed: any;
+  taskText: any;
+}) {
   console.log("Updating task details....");
   try {
     const { _id, completed, taskText } = inputs;
     const myTask = await Todo.findOne({ _id: _id });
+    if (myTask) {
+      if (typeof completed != "undefined") {
+        if (typeof completed != "boolean")
+          return {
+            statusCode: 400,
+            body: { error: "Invalid completion status" },
+          };
+        if (myTask) myTask.completed = completed;
+      }
 
-    if (typeof completed != "undefined") {
-      if (typeof completed != "boolean")
-        return {
-          statusCode: 400,
-          body: { error: "Invalid completion status" },
-        };
-      myTask.completed = completed;
+      if (typeof taskText != "undefined") {
+        if (taskText == "" || typeof taskText != "string")
+          return {
+            statusCode: 400,
+            body: { error: "Invalid completion status" },
+          };
+        myTask.taskText = taskText;
+      }
+
+      await myTask.save();
+      return {
+        statusCode: 200,
+        body: { todo: myTask.toObject({ versionKey: false }) },
+      };
     }
-
-    if (typeof taskText != "undefined") {
-      if (taskText == "" || typeof taskText != "string")
-        return {
-          statusCode: 400,
-          body: { error: "Invalid completion status" },
-        };
-      myTask.taskText = taskText;
-    }
-
-    await myTask.save();
-    return {
-      statusCode: 200,
-      body: { todo: myTask.toObject({ versionKey: false }) },
-    };
-  } catch (err) {
+  } catch (err: any) {
     return {
       statusCode: 400,
       body: { error: "Error while updating task details: " + err.message },
     };
   }
-};
+}
 
 //deleting a task
-const deleteTask = async (inputs) => {
+export async function deleteTask(inputs: { _id?: string }) {
   console.log("Deleteing a task.....");
   try {
     const _id = inputs._id;
     const taskToDel = await Todo.findOne({ _id: _id });
     const delTask = await Todo.deleteOne({ _id: _id });
-    return {
-      statusCode: 200,
-      body: {
-        todo: taskToDel.toObject({ versionKey: false }),
-      },
-    };
-  } catch (err) {
+    if (taskToDel) {
+      return {
+        statusCode: 200,
+        body: {
+          todo: taskToDel.toObject({ versionKey: false }),
+        },
+      };
+    }
+  } catch (err: any) {
     return {
       statusCode: 400,
       body: {
@@ -144,13 +161,13 @@ const deleteTask = async (inputs) => {
       },
     };
   }
-};
+}
 
 //inserting multiple tasks
-const batchInsertTask = async (inputs) => {
+export async function batchInsertTask(inputs: { todos: any; userId: any }) {
   const { todos, userId } = inputs;
 
-  const arrProm = todos.map((oneTask) => {
+  const arrProm = todos.map((oneTask: { taskText: any }) => {
     return insertTask({ taskText: oneTask.taskText, userId });
   });
   const retArrs = await Promise.all(arrProm); //retArrs-> array of resolved promises
@@ -159,12 +176,4 @@ const batchInsertTask = async (inputs) => {
     statusCode: 200,
     body: { todos: retArrs },
   };
-};
-
-module.exports = {
-  fetchTodos,
-  insertTask,
-  deleteTask,
-  updateTask,
-  batchInsertTask,
-};
+}
