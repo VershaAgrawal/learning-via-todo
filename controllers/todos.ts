@@ -70,16 +70,15 @@ export async function insertTask(inputs: TodosInput) {
     await newTodo.save();
 
     const user = await User.findOne({ _id: userId }, { slackUrl: 1 });
-    if (user) {
-      if (
-        typeof newTodo.taskText != "undefined" &&
-        typeof user.slackUrl != "undefined"
-      ) {
-        await postToSlack({
-          taskText: newTodo.taskText,
-          slackUrl: user.slackUrl,
-        });
-      }
+
+    if (
+      typeof newTodo.taskText != "undefined" &&
+      typeof user?.slackUrl != "undefined"
+    ) {
+      await postToSlack({
+        taskText: newTodo.taskText,
+        slackUrl: user.slackUrl,
+      });
     }
 
     //const { __v, ...retTodo } = newTodo.toJSON(); //--- Destructing the JSON {versionKey variable, rest json variable}
@@ -98,38 +97,37 @@ export async function insertTask(inputs: TodosInput) {
 //update a task
 export async function updateTask(inputs: {
   _id: any;
-  completed: any;
-  taskText: any;
+  completed?: Boolean;
+  taskText?: String;
 }) {
   console.log("Updating task details....");
   try {
     const { _id, completed, taskText } = inputs;
     const myTask = await Todo.findOne({ _id: _id });
-    if (myTask) {
-      if (typeof completed != "undefined") {
-        if (typeof completed != "boolean")
-          return {
-            statusCode: 400,
-            body: { error: "Invalid completion status" },
-          };
-        if (myTask) myTask.completed = completed;
-      }
 
-      if (typeof taskText != "undefined") {
-        if (taskText == "" || typeof taskText != "string")
-          return {
-            statusCode: 400,
-            body: { error: "Invalid completion status" },
-          };
-        myTask.taskText = taskText;
-      }
-
-      await myTask.save();
-      return {
-        statusCode: 200,
-        body: { todo: myTask.toObject({ versionKey: false }) },
-      };
+    if (typeof completed != "undefined") {
+      if (typeof completed != "boolean")
+        return {
+          statusCode: 400,
+          body: { error: "Invalid completion status" },
+        };
+      if (myTask) myTask.completed = completed;
     }
+
+    if (typeof taskText != "undefined") {
+      if (taskText == "" || typeof taskText != "string")
+        return {
+          statusCode: 400,
+          body: { error: "Invalid completion status" },
+        };
+      if (myTask) myTask.taskText = taskText;
+    }
+
+    await myTask?.save();
+    return {
+      statusCode: 200,
+      body: { todo: myTask?.toObject({ versionKey: false }) },
+    };
   } catch (err: any) {
     return {
       statusCode: 400,
@@ -145,14 +143,13 @@ export async function deleteTask(inputs: { _id?: string }) {
     const _id = inputs._id;
     const taskToDel = await Todo.findOne({ _id: _id });
     const delTask = await Todo.deleteOne({ _id: _id });
-    if (taskToDel) {
-      return {
-        statusCode: 200,
-        body: {
-          todo: taskToDel.toObject({ versionKey: false }),
-        },
-      };
-    }
+
+    return {
+      statusCode: 200,
+      body: {
+        todo: taskToDel?.toObject({ versionKey: false }),
+      },
+    };
   } catch (err: any) {
     return {
       statusCode: 400,
