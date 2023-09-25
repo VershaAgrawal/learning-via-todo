@@ -1,22 +1,29 @@
-const Todo = require("../models/todo");
-const User = require("../models/user");
+import { Request, Response, NextFunction } from "express";
+import { Todo } from "../models/todo";
+import { User } from "../models/user";
 
-const checkTodosID = async (req, res, next) => {
+export async function checkTodosID(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   let _id = req.params._id;
   const idRegexp = /^[0-9a-fA-F]{24}$/;
 
   if (_id.match(idRegexp) && (await Todo.findOne({ _id: _id }))) return next();
 
   res.status(400).json({ error: "Invalid id" });
-};
+}
 
-const checkUserId = async (req, res, next) => {
+export async function checkUserId(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   let _id = req.params._id;
   const idRegexp = /^[0-9a-fA-F]{24}$/;
 
   if (_id.match(idRegexp) && (await User.findOne({ _id: _id }))) return next();
 
   res.status(400).json({ error: "Invalid id" });
-};
-
-module.exports = { checkTodosID, checkUserId };
+}

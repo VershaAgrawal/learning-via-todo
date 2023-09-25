@@ -1,9 +1,10 @@
 const axios = require("axios");
 
-const postToSlack = async (input) => {
+export async function postToSlack(input: {
+  taskText: String;
+  slackUrl: String;
+}): Promise<void> {
   const { taskText, slackUrl } = input;
   const payload = { text: "New Todo created: " + taskText };
   const status = await axios.post(slackUrl, payload);
-};
-
-module.exports = postToSlack;
+}

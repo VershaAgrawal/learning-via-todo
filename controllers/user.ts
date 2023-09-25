@@ -1,8 +1,14 @@
-const User = require("../models/user");
-const jwt = require("jsonwebtoken");
+import { User } from "../models/user";
+import { Request, Response, NextFunction } from "express";
+import { IGetUserAuthInfoRequest } from "./definitionfile";
+import jwt from "jsonwebtoken";
 const secretKey = process.env.SECRET_KEY || "secretkey";
 
-const verifyToken = async (req, res, next) => {
+export async function verifyToken(
+  req: IGetUserAuthInfoRequest,
+  res: Response,
+  next: NextFunction
+) {
   let token = req.headers.authorization;
 
   //Authorization: 'Bearer TOKEN'
@@ -22,9 +28,9 @@ const verifyToken = async (req, res, next) => {
       .status(401)
       .json({ success: false, error: "Error in verifying the token" });
   }
-};
+}
 
-const signUp = async (inputs) => {
+export async function signUp(inputs: { emailId: String; password: String }) {
   console.log("Insering new user...");
   try {
     const { emailId, password } = inputs;
@@ -45,7 +51,8 @@ const signUp = async (inputs) => {
       statusCode: 200,
       body: { user: user.toObject({ versionKey: false }) },
     };
-  } catch (err) {
+  } catch (err: any) {
+    let body;
     console.log(err.code);
 
     if (err.code == 11000) body = { error: "User already exists" };
@@ -56,9 +63,9 @@ const signUp = async (inputs) => {
       body: body,
     };
   }
-};
+}
 
-const login = async (inputs) => {
+export async function login(inputs: { emailId: any; password: any }) {
   console.log("Logging in...");
   try {
     const { emailId, password } = inputs;
@@ -99,19 +106,19 @@ const login = async (inputs) => {
         token: token,
       },
     };
-  } catch (err) {
+  } catch (err: any) {
     return {
       statusCode: 400,
       body: { error: "Error while logging in: " + err.message },
     };
   }
-};
+}
 
 //Update slack URL in users document
-const updateSlackUrl = async (inputs) => {
+export async function updateSlackUrl(inputs: { _id: any; slackUrl: String }) {
   console.log("Updating slack url...");
   const { _id, slackUrl } = inputs;
-  if (typeof slackUrl == "" || typeof slackUrl != "string") {
+  if (slackUrl == "" || typeof slackUrl != "string") {
     return {
       statusCode: 400,
       body: { error: "Invalid URL" },
@@ -123,6 +130,4 @@ const updateSlackUrl = async (inputs) => {
     statusCode: 200,
     body: { user: updatedUser },
   };
-};
-
-module.exports = { signUp, login, verifyToken, updateSlackUrl };
+}
