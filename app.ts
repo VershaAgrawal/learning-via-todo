@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
 const app = express();
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
 const port = 5000;
 const db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
 
