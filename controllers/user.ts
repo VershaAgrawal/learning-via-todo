@@ -2,6 +2,7 @@ import { User } from "../models/user";
 import { Request, Response, NextFunction } from "express";
 import { IGetUserAuthInfoRequest } from "./definitionfile";
 import jwt from "jsonwebtoken";
+
 const secretKey = process.env.SECRET_KEY || "secretkey";
 
 export async function verifyToken(

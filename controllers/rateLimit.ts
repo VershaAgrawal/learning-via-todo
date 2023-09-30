@@ -11,7 +11,7 @@ const client = new RedisClient({
   //   db: 0, // Defaults to 0
 });
 
-const loginRateLimiter: RateLimitRequestHandler = rateLimit({
+export const loginRateLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 1 * 60 * 1000, //1 minute
   max: 5,
   standardHeaders: true,
@@ -23,9 +23,9 @@ const loginRateLimiter: RateLimitRequestHandler = rateLimit({
   }),
 });
 
-const todosRateLimiter: RateLimitRequestHandler = rateLimit({
+export const todosRateLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 10,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests, please try again later." },
@@ -34,5 +34,3 @@ const todosRateLimiter: RateLimitRequestHandler = rateLimit({
     sendCommand: (...args) => client.call(...args),
   }),
 });
-
-module.exports = { loginRateLimiter, todosRateLimiter };

@@ -1,10 +1,7 @@
 import express, { Response } from "express";
-const router = express.Router();
 import { User } from "../models/user";
 import { IGetUserAuthInfoRequest } from "../controllers/definitionfile";
-
-const { checkTodosID } = require("../controllers/validation");
-
+import { checkTodosID } from "../controllers/validation";
 import {
   fetchTodos,
   insertTask,
@@ -12,9 +9,23 @@ import {
   updateTask,
   batchInsertTask,
 } from "../controllers/todos";
-
 import { verifyToken } from "../controllers/user";
+
+const router = express.Router();
+
 //Fetching all the task
+
+/**
+ * @openapi
+ * /todos:
+ *  get:
+ *   tag:
+ *   - Fetch task
+ *   description: Fetches all the task of the user
+ *   responses:
+ *     200:
+ *      description: Returns a json
+ */
 router.get(
   "/",
   verifyToken,
@@ -61,4 +72,4 @@ router.post(
   }
 );
 
-module.exports = router;
+export default router;

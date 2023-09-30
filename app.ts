@@ -1,17 +1,15 @@
 import express, { Express, Request, Response } from "express";
-const app = express();
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import swaggerDocs from "./utils/swagger";
+import todos from "./routes/todos";
+import { loginRateLimiter, todosRateLimiter } from "./controllers/rateLimit";
+import user from "./routes/user";
+
+const app = express();
 const port = 5000;
 const db = "mongodb://127.0.0.1:27017/todos"; //url, port 27017
 
-const todos = require("./routes/todos");
-const {
-  loginRateLimiter,
-  todosRateLimiter,
-} = require("./controllers/rateLimit");
-
-const user = require("./routes/user");
 mongoose
   .connect(db)
   .catch((err: { message: string }) =>
@@ -27,6 +25,8 @@ app.use(
 );
 
 app.use("/todos", todosRateLimiter, todos);
+
+swaggerDocs(app, port);
 
 app.use("/", loginRateLimiter, user);
 
